@@ -79,18 +79,21 @@ def scrape_data():
     and compare with the timestamp of the new data
 '''
 def is_data_new(new_timestamp):
-    # Create a Supabase client
+    # Create a Supabase clien
     supabase: Client = create_client(DB_URL, DB_KEY)
 
     # Query the last row in the database if it exists
-    response = supabase.table(OUTAGE_DB_NAME).select("timestamp").order("timestamp", desc=True).limit(1).execute()
+    response = supabase.table(OUTAGE_DB_NAME).select("published_timestamp").order("published_timestamp", desc=True).limit(1).execute()
     if len(response.data) == 0:
         # No data in the database, so consider it new
         return True
-    last_timestamp = response.data[0]["timestamp"]
+    last_published_db_timestamp = response.data[0]["published_timestamp"]
+    # print("last_db_timestamp is ", last_published_db_timestamp)
+    # print("new_timestamp is ", new_timestamp)
 
     # Compare the timestamps
-    if new_timestamp > last_timestamp:
+    if new_timestamp > last_published_db_timestamp:
+        print("Data with new published timestamp found")
         return True
     else:
         return False
