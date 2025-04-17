@@ -56,7 +56,7 @@ def scrape_data():
 
     if timestamp_span:
         raw_text = timestamp_span.get_text(strip=True)
-        print("Raw text found:", raw_text)
+        print(f"Timestamp text found:\"{raw_text}\"")
 
         # Extract and clean date string
         match = re.search(r"as of (.+)", raw_text)
@@ -68,7 +68,7 @@ def scrape_data():
 
             # Now parse
             parsed_timestamp = datetime.strptime(date_str, "%B %d, %Y, %I:%M %p")
-            print("Parsed timestamp:", parsed_timestamp.isoformat())
+            # print("Parsed timestamp:", parsed_timestamp.isoformat())
 
         return {"region_data": region_data, "published_timestamp": parsed_timestamp.isoformat()}
     else:
@@ -157,11 +157,12 @@ if __name__ == "__main__":
         data_is_new = is_data_new(region_data_and_published_timestamp["published_timestamp"])
         data_is_valid = validate_data(region_data_and_published_timestamp["region_data"])
         if not data_is_new:
-            print("Data is not new")
+            print("Data is not new. Will not insert into database")
         if not data_is_valid:
-            print("Data is not valid")
+            print("Data is not valid. Will not insert into database")
 
         if data_is_new and data_is_valid:
+            print("Data is new and valid. Attempting to insert into database")
             insert_data_to_db(region_data_and_published_timestamp)
 
     except Exception as e:
