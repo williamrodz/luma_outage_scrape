@@ -100,17 +100,25 @@ def is_data_new(new_timestamp):
 
 
 def validate_data(region_data):
+    print("Validating data...")
+    print(region_data)
+
+
     # Check if the data is in the expected format
     for entry in region_data:
         if not isinstance(entry, dict):
             raise ValueError("Data entry is not a dictionary")
         if "Region" not in entry or "Customers Restored" not in entry or "Total Customers" not in entry or "% Restored" not in entry:
             raise ValueError("Missing required fields in data entry")
+        # check that everything except the percent values are integers
+        if not isinstance(entry["Region"], str):
+            raise ValueError("Region is not a string")
+        
         if not isinstance(entry["Region"], str) or not isinstance(entry["Customers Restored"], str) or not isinstance(entry["Total Customers"], str) or not isinstance(entry["% Restored"], str):
             raise ValueError("Invalid data type for one of the fields")
         # Check if the values are in the expected format
-        if not entry["Customers Restored"].replace(",", "").isdigit() or not entry["Total Customers"].replace(",", "").isdigit() or not entry["% Restored"].replace("%", "").replace(",", "").isdigit():
-            raise ValueError("Invalid value format for one of the fields")
+        # if not entry["Customers Restored"].replace(",", "").isdigit() or not entry["Total Customers"].replace(",", "").isdigit() or not entry["% Restored"].replace("%", "").replace(",", "").isdigit():
+        #     raise ValueError("Invalid value format for one of the fields")
     return True
 
 def insert_data_to_db(region_data_and_published_timestamp):
@@ -136,7 +144,9 @@ def insert_data_to_db(region_data_and_published_timestamp):
             else:
                 column_mappings = {"Customers Restored":"restored_customers","Total Customers":"total_customers","% Restored":"percent_restored"}
                 column_name = f"{region}_{column_mappings[key]}".lower()
-                processed_value = int(entry[key].replace(",", "").replace("%", ""))
+                data_type_mappings = {"Customers Restored":int,"Total Customers":int,"% Restored":float}
+                processed_value = float(entry[key].replace(",", "").replace("%", ""))
+                processed_value = data_type_mappings[key](processed_value)
                 long_row[column_name] = processed_value 
 
     # Time stamp

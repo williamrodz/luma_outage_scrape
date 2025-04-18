@@ -1,4 +1,4 @@
-name: Run Scraper Every 10 Minutes
+name: Run Outage Scraper Every 5 Minutes
 
 on:
   schedule:
